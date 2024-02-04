@@ -2,16 +2,15 @@ const express = require("express");
 const http = require("http");
 const socketIO = require("socket.io");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const Document = require("./Document");
 require("dotenv").config();
-const cors = require("cors");
-
-app.use(cors());
-
 
 const app = express();
 const server = http.createServer(app);
 const io = socketIO(server);
+
+app.use(cors()); 
 
 mongoose
   .connect(process.env.MONGO_URI)
