@@ -23,6 +23,7 @@ const TextEditor = () => {
     wrapper.append(editor);
     new Quill(editor, {
       theme: "snow",
+      modules: { toolbar: TOOLBAR_OPTIONS },
     });
   }, []);
 
