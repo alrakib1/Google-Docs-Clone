@@ -4,6 +4,10 @@ const socketIO = require("socket.io");
 const mongoose = require("mongoose");
 const Document = require("./Document");
 require("dotenv").config();
+const cors = require("cors");
+
+app.use(cors());
+
 
 const app = express();
 const server = http.createServer(app);
