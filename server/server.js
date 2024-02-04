@@ -2,7 +2,7 @@ const express = require("express");
 const http = require("http");
 const socketIO = require("socket.io");
 const mongoose = require("mongoose");
-const cors = require("cors");
+const cors = require("cors");  // Import the cors middleware
 const Document = require("./Document");
 require("dotenv").config();
 
