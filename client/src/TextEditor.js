@@ -1,11 +1,44 @@
 import Quill from "quill";
 import "quill/dist/quill.snow.css";
 import { useCallback, useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
 import { io } from "socket.io-client";
 
 const TextEditor = () => {
+  const { id: documentId } = useParams();
+
   const [socket, setSocket] = useState();
   const [quill, setQuill] = useState();
+
+  useEffect(() => {
+    if (!socket || !quill) return;
+
+    const interval = setInterval(() => {
+      socket.emit("save-document", quill.getContents());
+    }, 2000);
+
+    return () => {
+      clearInterval(interval);
+    };
+  }, [socket, quill]);
+
+
+  // get document from server by id
+  useEffect(() => {
+    if (!socket || !quill) return;
+  
+    socket.once("load-document", (document) => {
+      // console.log('document loaded', document);
+      quill.setContents(document);
+      quill.enable();
+    });
+  
+    if (documentId) {
+      // console.log("Requesting document with ID:", documentId);
+      socket.emit("get-document", documentId);
+    }
+  }, [socket, quill, documentId]);
+  
 
   // connect to socket.io server
   useEffect(() => {
@@ -19,13 +52,13 @@ const TextEditor = () => {
   // sending changes
 
   useEffect(() => {
-    if (quill == null || socket == null) return;
+    if (!quill || !socket) return;
 
-    const handler = quill.on("text-change", (delta, oldDelta, source) => {
+    const handler = (delta, oldDelta, source) => {
       if (source !== "user") return;
 
       socket.emit("send-changes", delta);
-    });
+    };
 
     quill.on("text-change", handler);
 
@@ -37,7 +70,7 @@ const TextEditor = () => {
   // receiving changes
 
   useEffect(() => {
-    if (quill == null || socket == null) return;
+    if (!quill || !socket) return;
 
     const handler = (delta) => {
       quill.updateContents(delta);
@@ -73,6 +106,8 @@ const TextEditor = () => {
       theme: "snow",
       modules: { toolbar: TOOLBAR_OPTIONS },
     });
+    q.disable();
+    q.setText("Loading...");
     setQuill(q);
   }, []);
 

@@ -1,6 +1,13 @@
-require("dotenv").config();
+const express = require("express");
+const http = require("http");
+const socketIO = require("socket.io");
 const mongoose = require("mongoose");
 const Document = require("./Document");
+require("dotenv").config();
+
+const app = express();
+const server = http.createServer(app);
+const io = socketIO(server);
 
 mongoose
   .connect(process.env.MONGO_URI)
@@ -9,18 +16,13 @@ mongoose
 
 const defaultData = "";
 
-const io = require("socket.io")(3001, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-  },
+app.get("/", (req, res) => {
+  res.send("Server is running");
 });
 
 io.on("connection", (socket) => {
   socket.on("get-document", async (documentId) => {
-    // console.log("Request for document with ID:", documentId);
-    const document = await findORCreateDocument(documentId);
-    // console.log("Found or created document:", document);
+    const document = await findOrCreateDocument(documentId);
     socket.join(documentId);
     socket.emit("load-document", document.data);
 
@@ -29,15 +31,20 @@ io.on("connection", (socket) => {
     });
 
     socket.on("save-document", async (data) => {
-    //   console.log("Saving document:", data);
       await Document.findByIdAndUpdate(documentId, { data });
     });
   });
 });
 
-const findORCreateDocument = async (id) => {
+const findOrCreateDocument = async (id) => {
   if (id == null) return;
   const document = await Document.findById(id);
   if (document) return document;
   return await Document.create({ _id: id, data: defaultData });
 };
+
+const PORT = process.env.PORT || 3001;
+
+server.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
