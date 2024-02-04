@@ -22,23 +22,21 @@ const TextEditor = () => {
     };
   }, [socket, quill]);
 
-
   // get document from server by id
   useEffect(() => {
     if (!socket || !quill) return;
-  
+
     socket.once("load-document", (document) => {
       // console.log('document loaded', document);
       quill.setContents(document);
       quill.enable();
     });
-  
+
     if (documentId) {
       // console.log("Requesting document with ID:", documentId);
       socket.emit("get-document", documentId);
     }
   }, [socket, quill, documentId]);
-  
 
   // connect to socket.io server
   useEffect(() => {
