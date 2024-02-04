@@ -1,6 +1,10 @@
 {
-    "version": 2,
-    "builds": [{ "src": "server.js", "use": "@vercel/node" }],
-    "routes": [{ "src": "/(.*)", "dest": "/server.js" }]
-  }
-  
+  "version": 2,
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" }
+  ],
+  "routes": [
+    { "src": "/socket.io/(.*)", "dest": "https://docs-clone-mocha.vercel.app/socket.io/$1", "methods": ["GET", "POST"] },
+    { "src": "/(.*)", "dest": "/server.js" }
+  ]
+}
